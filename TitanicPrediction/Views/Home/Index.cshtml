@@ -1,0 +1,252 @@
+﻿@model TitanicPrediction.Models.Titanic
+@{
+    ViewBag.Title = "Home Page";
+}
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    h2 {
+        padding-top: 10px;
+    }
+
+    input[type=text], select, textarea {
+        width: 100%;
+        padding: 4px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        resize: vertical;
+    }
+
+    label {
+        padding: 4px 4px 4px 0;
+        display: inline-block;
+    }
+
+    input[type=submit] {
+        background-color: #4CAF50;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        float: left;
+    }
+
+        input[type=submit]:hover {
+            background-color: #45a049;
+        }
+
+    .container {
+        border-radius: 5px;
+        /*background-color: #f2f2f2;*/
+        padding: 20px;
+    }
+
+    .col-1 {
+        float: left;
+        width: 10%;
+        margin-top: 6px;
+    }
+
+    .col-2 {
+        float: left;
+        width: 40%;
+        margin-top: 6px;
+    }
+
+    .col-3 {
+        float: left;
+        width: 20%;
+        margin-top: 6px;
+    }
+
+    .col-4 {
+        float: left;
+        width: 30%;
+        margin-top: 6px;
+        font-weight: lighter !important;
+    }
+
+    .col-5 {
+        float: right;
+        width: 50%;
+        margin-top: 6px;
+    }
+
+    .col-0 {
+        float: left;
+        width: 50%;
+        margin-top: 6px;
+    }
+    /* Clear floats after the columns */
+    .row:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+</style>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#ddlPassengerId').change(function () {
+            $.ajax({
+                type: "GET",
+                url: "/Home/GetPassengerDetails",
+                data: { passengerId: $('#ddlPassengerId').val() },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    $('#pclass').val(data.Pclass);
+                    $('#sex').val(data.Sex);
+                    $('#age').val(data.Age);
+                    $('#sibsp').val(data.Sibsp);
+                    $('#parch').val(data.parch);
+                    $('#fare').val(data.Fare);
+                    $('#embarked').val(data.Embarked);
+
+                    $('#lblpassengerid').html('');
+                    $('#lblname').html('');
+                    $('#lblsurvived').html('');
+                    $('#lblscoreprobability').html('');
+                }
+            });
+        });
+
+        $('#btnSubmit').click(function () {
+            $.ajax({
+                type: "GET",
+                url: "/Home/GetSurvivalInfo",
+                data: {
+                    passengerId: $('#ddlPassengerId').val(),
+                    pclass: $('#pclass').val(),
+                    sex: $('#sex').val(),
+                    age: $('#age').val(),
+                    sibsp: $('#sibsp').val(),
+                    parch: $('#parch').val(),
+                    fare: $('#fare').val(),
+                    embarked: $('#embarked').val()
+                },
+                datatype: "json",
+                traditional: true,
+                success: function (data) {
+                    $('#lblpassengerid').html(data.PassengerId);
+                    $('#lblname').html(data.Name);
+                    if (data.Survived == 0)
+                        $('#lblsurvived').html("Passenger Not Survived");
+                    else if (data.Survived == 1)
+                        $('#lblsurvived').html("Yay! Passenger Survived");
+                    $('#lblscoreprobability').html(data.ScoredProbability * 100 + " %");
+                }
+            });
+        });
+    });
+</script>
+
+<h2>Predict Survivers in Titanic ship</h2>
+<p></p>
+
+<div class="container">
+    <div class="row">
+        <div class="col-0">
+            <h3>Test Data</h3>
+        </div>
+        <div class="col-5">
+            <h3>Prediction Result</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-1">
+            <label for="fname">Passenger Id</label>
+        </div>
+        <div class="col-2">
+            <div class="col-2">
+                @Html.DropDownListFor(x => x.PassengerIdList, Model.PassengerIdList, "-- Select Passenger --", new { @id = "ddlPassengerId" })
+            </div>
+        </div>
+        <div class="col-3">
+            <label for="lname">Passenger Id</label>
+        </div>
+        <div class="col-4">
+            <label id="lblpassengerid" for="lname"></label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-1">
+            <label for="lname">Pclass</label>
+        </div>
+        <div class="col-2">
+            <input type="text" id="pclass" name="pclass" disabled>
+        </div>
+        <div class="col-3">
+            <label for="lname">Name</label>
+        </div>
+        <div class="col-4">
+            <label id="lblname" for="lname"></label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-1">
+            <label for="lname">Sex</label>
+        </div>
+        <div class="col-2">
+            <input type="text" id="sex" name="sex" disabled>
+        </div>
+        <div class="col-3">
+            <label for="lname">Survived</label>
+        </div>
+        <div class="col-4">
+            <label id="lblsurvived" for="lname"></label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-1">
+            <label for="lname">Age</label>
+        </div>
+        <div class="col-2">
+            <input type="text" id="age" name="age" disabled>
+        </div>
+        <div class="col-3">
+            <label for="lname">Score Probability</label>
+        </div>
+        <div class="col-4">
+            <label id="lblscoreprobability" for="lname"></label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-1">
+            <label for="lname">SibSp</label>
+        </div>
+        <div class="col-2">
+            <input type="text" id="sibsp" name="sibsp" disabled>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-1">
+            <label for="lname">Parch</label>
+        </div>
+        <div class="col-2">
+            <input type="text" id="parch" name="parch" disabled>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-1">
+            <label for="lname">Fare</label>
+        </div>
+        <div class="col-2">
+            <input type="text" id="fare" name="fare" disabled>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-1">
+            <label for="lname">Embarked</label>
+        </div>
+        <div class="col-2">
+            <input type="text" id="embarked" name="embarked" disabled>
+        </div>
+    </div>
+    <div class="row">
+        <input id="btnSubmit" type="submit" value="Submit">
+    </div>
+</div>
